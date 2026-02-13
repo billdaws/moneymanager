@@ -1,0 +1,5 @@
+:8080
+
+encode gzip
+
+reverse_proxy kreuzberg:8000

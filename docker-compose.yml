@@ -1,0 +1,57 @@
+services:
+  kreuzberg:
+    image: goldziher/kreuzberg:latest
+    container_name: kreuzberg
+    networks:
+      - internal_no_egress
+    read_only: true
+    tmpfs:
+      - /tmp:exec
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+    expose:
+      - "8000"
+
+  ingress:
+    image: caddy:alpine
+    container_name: kreuzberg_ingress
+    depends_on:
+      - kreuzberg
+    ports:
+      - "8080:8080"
+    networks:
+      - internal_no_egress
+      - edge
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - SETUID
+      - SETGID
+      - CHOWN
+    tmpfs:
+      - /tmp:exec
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: Caddyfile
+
+networks:
+  internal_no_egress:
+    internal: true
+  edge:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
