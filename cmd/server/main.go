@@ -56,7 +56,11 @@ func main() {
 	)
 
 	// Create HTTP server
-	srv := server.New(cfg, logger)
+	srv, err := server.New(cfg, logger)
+	if err != nil {
+		logger.Error("failed to initialize server", "error", err)
+		os.Exit(1)
+	}
 
 	// Start server in a goroutine
 	serverErrors := make(chan error, 1)
